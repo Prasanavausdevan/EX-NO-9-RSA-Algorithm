@@ -37,11 +37,108 @@ The security of RSA relies on the difficulty of factoring large numbers; thus, c
 
 ## Program:
 
+```c
+#include <stdio.h>
+
+// Function to calculate greatest common divisor (GCD)
+int gcd(int a, int b) {
+    while (b != 0) {
+        int temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
+}
+
+// Modular exponentiation: (base^exp) % mod
+int mod_exp(int base, int exp, int mod) {
+    long long result = 1;
+    long long b = base % mod;
+    while (exp > 0) {
+        if (exp % 2 == 1) {
+            result = (result * b) % mod;
+        }
+        exp = exp >> 1;          // exp = exp / 2
+        b = (b * b) % mod;
+    }
+    return (int)result;
+}
+
+// Modular inverse using Extended Euclidean Algorithm
+int mod_inverse(int e, int phi_n) {
+    int t = 0, new_t = 1;
+    int r = phi_n, new_r = e;
+    while (new_r != 0) {
+        int quotient = r / new_r;
+
+        int temp_t = t;
+        t = new_t;
+        new_t = temp_t - quotient * new_t;
+
+        int temp_r = r;
+        r = new_r;
+        new_r = temp_r - quotient * new_r;
+    }
+    if (r > 1) return -1;      // No inverse
+    if (t < 0) t += phi_n;
+    return t;
+}
+
+int main() {
+    int p, q, n, phi_n, e, d;
+    int message, encrypted_message, decrypted_message;
+
+    printf("\n***** Simulation of RSA Encryption and Decryption *****\n\n");
+
+    // Get two prime numbers
+    printf("Enter a prime number (p): ");
+    scanf("%d", &p);
+    printf("Enter another prime number (q): ");
+    scanf("%d", &q);
+
+    // Calculate n and phi(n)
+    n = p * q;
+    phi_n = (p - 1) * (q - 1);
+
+    // Choose e such that gcd(e, phi_n) = 1
+    do {
+        printf("Enter a value for public key exponent (e) such that 1 < e < %d: ", phi_n);
+        scanf("%d", &e);
+    } while (gcd(e, phi_n) != 1);
+
+    // Compute d, the modular inverse of e mod phi_n
+    d = mod_inverse(e, phi_n);
+    if (d == -1) {
+        printf("Modular inverse does not exist for the given 'e'. Exiting.\n");
+        return 1;
+    }
+
+    printf("Public key: (n = %d, e = %d)\n", n, e);
+    printf("Private key: (n = %d, d = %d)\n", n, d);
+
+    // Get message
+    printf("Enter the message to encrypt (as an integer): ");
+    scanf("%d", &message);
+
+    // Encrypt and Decrypt
+    encrypted_message = mod_exp(message, e, n);
+    printf("Encrypted message: %d\n", encrypted_message);
+
+    decrypted_message = mod_exp(encrypted_message, d, n);
+    printf("Decrypted message: %d\n", decrypted_message);
+
+    return 0;
+}
+
+
+```
+
 
 
 
 ## Output:
 
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/f66e7ad7-1d74-489f-89a5-4f30d4079c9d" />
 
 
 ## Result:
